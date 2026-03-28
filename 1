@@ -1,0 +1,63 @@
+#include <iostream>
+#include <vector>
+#include <stdexcept>
+
+// 抽象類別 MinPQ 
+template <class T>
+class MinPQ {
+public:
+    virtual ~MinPQ() {}
+    virtual bool IsEmpty() const = 0;
+    virtual const T& Top() const = 0; 
+    virtual void Push(const T&) = 0;
+    virtual void Pop() = 0;
+};
+
+// 實作 MinHeap 
+template <class T>
+class MinHeap : public MinPQ<T> {
+private:
+    std::vector<T> heap;
+
+    void filterUp(int index) {
+        while (index > 0) {
+            int parent = (index - 1) / 2;
+            if (heap[index] < heap[parent]) {
+                std::swap(heap[index], heap[parent]);
+                index = parent;
+            } else break;
+        }
+    }
+
+    void filterDown(int index) {
+        int child = 2 * index + 1;
+        while (child < heap.size()) {
+            if (child + 1 < heap.size() && heap[child + 1] < heap[child]) child++;
+            if (heap[child] < heap[index]) {
+                std::swap(heap[child], heap[index]);
+                index = child;
+                child = 2 * index + 1;
+            } else break;
+        }
+    }
+
+public:
+    bool IsEmpty() const override { return heap.empty(); }
+    
+    const T& Top() const override {
+        if (IsEmpty()) throw std::runtime_error("Heap is empty");
+        return heap[0];
+    }
+
+    void Push(const T& x) override {
+        heap.push_back(x);
+        filterUp(heap.size() - 1); // 複雜度 O(log n)
+    }
+
+    void Pop() override {
+        if (IsEmpty()) return;
+        heap[0] = heap.back();
+        heap.pop_back();
+        filterDown(0); // 複雜度 O(log n)
+    }
+};
