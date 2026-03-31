@@ -1,0 +1,62 @@
+#include <iostream>
+
+// 定義 BST 節點結構
+struct Node {
+    int key;
+    Node *left, *right;
+    Node(int item) : key(item), left(nullptr), right(nullptr) {}
+};
+
+class BST {
+public:
+    Node* root;
+    BST() : root(nullptr) {}
+
+    // 刪除功能的公開介面
+    void remove(int k) {
+        root = deleteNode(root, k);
+    }
+
+private:
+    // 輔助函式：尋找右子樹中的最小值節點 (In-order Successor)
+    Node* minValueNode(Node* node) {
+        Node* current = node;
+        while (current && current->left != nullptr)
+            current = current->left;
+        return current;
+    }
+
+    // 核心刪除遞迴邏輯 
+    Node* deleteNode(Node* root, int k) {
+        if (root == nullptr) return root;
+
+        // 搜尋階段
+        if (k < root->key)
+            root->left = deleteNode(root->left, k);
+        else if (k > root->key)
+            root->right = deleteNode(root->right, k);
+        
+        // 找到節點後的處理階段
+        else {
+            // 情況 1 & 2: 只有一個子節點或沒有子節點
+            if (root->left == nullptr) {
+                Node* temp = root->right;
+                delete root;
+                return temp;
+            }
+            else if (root->right == nullptr) {
+                Node* temp = root->left;
+                delete root;
+                return temp;
+            }
+
+            // 情況 3: 有兩個子節點
+            // 找到右子樹的最小值（後繼者）來替換
+            Node* temp = minValueNode(root->right);
+            root->key = temp->key; // 複製數值
+            // 刪除該後繼者節點
+            root->right = deleteNode(root->right, temp->key);
+        }
+        return root;
+    }
+};
