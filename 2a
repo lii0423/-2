@@ -1,0 +1,80 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <random>
+#include <cmath>
+#include <iomanip>
+
+using namespace std;
+
+struct Node {
+    int key;
+    Node *left, *right;
+    Node(int k) : key(k), left(nullptr), right(nullptr) {}
+};
+
+class BST {
+public:
+    Node* root = nullptr;
+
+    void insert(int k) {
+        root = insert(root, k);
+    }
+
+    int getHeight() {
+        return getHeight(root);
+    }
+
+    void clear(Node* node) {
+        if (!node) return;
+        clear(node->left);
+        clear(node->right);
+        delete node;
+    }
+
+private:
+    Node* insert(Node* node, int k) {
+        if (!node) return new Node(k);
+        if (k < node->key) node->left = insert(node->left, k);
+        else if (k > node->key) node->right = insert(node->right, k);
+        return node;
+    }
+
+    int getHeight(Node* node) {
+        if (!node) return 0;
+        return 1 + max(getHeight(node->left), getHeight(node->right));
+    }
+};
+
+int main() {
+    // 設定隨機數產生器
+    random_device rd;
+    mt19937 g(rd());
+
+    cout << fixed << setprecision(4);
+    cout << "n\tHeight(h)\tlog2(n)\t\th/log2(n)" << endl;
+    cout << "----------------------------------------------------" << endl;
+
+    int test_n[] = {100, 500, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000};
+
+    for (int n : test_n) {
+        BST tree;
+        vector<int> nums;
+        for (int i = 0; i < n; ++i) nums.push_back(i);
+        
+        // 隨機打亂數字順序以符合題目的 "random insertions"
+        shuffle(nums.begin(), nums.end(), g);
+
+        for (int x : nums) tree.insert(x);
+
+        int h = tree.getHeight();
+        double log2n = log2(n);
+        double ratio = h / log2n;
+
+        cout << n << "\t" << h << "\t\t" << log2n << "\t\t" << ratio << endl;
+        
+        tree.clear(tree.root);
+    }
+
+    return 0;
+}
